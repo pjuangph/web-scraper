@@ -13,7 +13,7 @@ class LinkFinder(HTMLParser): # Inherits from html parser
             for (attribute,value) in attrs:
                 if (attribute=='href'):
                     # Convert to full URL
-                    url = parse.urljoin(self.base,value) # if it already is the full url then it keeps and formats properly
+                    url = parse.urljoin(self.base_url,value) # if it already is the full url then it keeps and formats properly
                     self.links.add(url)
     
     

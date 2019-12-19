@@ -3,7 +3,7 @@
            - Gets the HTML
            - Adds page to crawled file
 """
-
+import urllib.parse
 from urllib.request import urlopen
 from link_finder import LinkFinder
 from general import *
@@ -40,8 +40,9 @@ class Spider:
     def crawl_page(thread_name, page_url):
         if page_url not in Spider.crawled:
             print(thread_name + ' crawling ' + page_url)
-            print("Queue " + str(len(Spider.queue_file)) + ' | Crawled')
-            Spider.add_links_to_queue(Spider.gather_link(page_url))
+            print("Queue " + str(len(Spider.queue)) + ' | Crawled')
+            Spider.add_links_to_queue(Spider.gather_links(page_url))
+            print("Spider queue:" + str(len(Spider.queue)))
             Spider.queue.remove(page_url) # removed  the already cralwed file 
             Spider.crawled.add(page_url)
             Spider.update_files()
@@ -55,15 +56,18 @@ class Spider:
         html_string = ''
         try:
             response = urlopen(page_url)
-            if response.getheader('Content-Type') == 'text/html':
+            if 'text/html' in response.getheader('Content-Type'):
                 html_bytes = response.read()
                 html_string = html_bytes.decode("utf-8")
             finder = LinkFinder(Spider.base_url,page_url)
             finder.feed(html_string)
-        except:
+        except ValueError as ex:
             print("Error: cannot crawl page")
+            print(ex)
             return set()
-        return finder.page_links()
+        temp = set()
+        temp.add(page_url)
+        return temp.union(finder.page_links())
     
     @staticmethod
     def add_links_to_queue(links):
@@ -81,3 +85,4 @@ class Spider:
     def update_files():
         set_to_file(Spider.queue,Spider.queue_file)
         set_to_file(Spider.crawled,Spider.crawled_file)
+
